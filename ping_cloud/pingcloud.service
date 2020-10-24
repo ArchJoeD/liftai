@@ -1,0 +1,12 @@
+[Unit]
+Description=Service to ping the Django server
+After=pgbouncer.service
+
+[Service]
+Type=simple
+ExecStart=/home/pi/.virtualenvs/liftai_pingcloud/bin/python -O /home/pi/.virtualenvs/liftai_pingcloud/bin/pingcloud
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

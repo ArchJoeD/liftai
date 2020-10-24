@@ -1,0 +1,13 @@
+{
+  "modem":"Huawei MS2372",
+  "sim":"Hologram",
+  "audio":true,
+  "audio-filter":true,
+  "accelerometer":"MPU6050",
+  "altimeter":"MPL3115A2",
+  "altimeter2":"ICP-10100",
+  "pushbutton":true,
+  "battery-backup":true,
+  "three-color-led":true,
+  "rtc":true
+}

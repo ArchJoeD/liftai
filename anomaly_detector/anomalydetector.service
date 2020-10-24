@@ -1,0 +1,12 @@
+[Unit]
+Description=Service to detect various types of anomalies in the data
+After=timeupdater.service pgbouncer.service
+
+[Service]
+Type=simple
+ExecStart=/home/pi/.virtualenvs/liftai_anomalydetector/bin/python -O /home/pi/.virtualenvs/liftai_anomalydetector/bin/anomalydetector
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

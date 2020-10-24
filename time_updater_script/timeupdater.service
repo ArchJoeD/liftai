@@ -1,0 +1,11 @@
+[Unit]
+Description=Service to update time on no network connection
+After=postgresql@9.6-main.service
+
+[Service]
+Type=simple
+ExecStart=/bin/bash /home/pi/time_update_from_db.sh start
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target

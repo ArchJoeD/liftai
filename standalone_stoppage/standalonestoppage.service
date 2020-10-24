@@ -1,0 +1,12 @@
+[Unit]
+Description=Service to detect standalone stoppages
+After=pgbouncer.service
+
+[Service]
+Type=simple
+ExecStart=/home/pi/.virtualenvs/liftai_standalonestoppage/bin/python -O /home/pi/.virtualenvs/liftai_standalonestoppage/bin/standalonestoppage
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

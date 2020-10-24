@@ -1,0 +1,23 @@
+
+### Basic Setup
+ssh to the board
+source /home/pi/.virtualenvs/liftai/bin/activate
+sudo su postgres
+
+### Using Sqlalchemy Core
+python3
+# From here on is within the python interpreter
+import sqlalchemy
+import psycopg2
+engine = sqlalchemy.create_engine('postgresql://postgres:pass@localhost/liftaidb')
+conn = engine.connect()
+result = conn.execute("""SELECT * FROM "accelerometer data" """)
+for row in result:
+    print("id: ", row['id'], ",  z_data: ", row['z_data'])
+
+### Using psql directly
+psql
+\l              # lists out the databases
+\c liftaidb     # connect to database
+
+

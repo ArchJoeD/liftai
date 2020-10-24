@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:9.6.11
+    environment:
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_USER=usr
+      - POSTGRES_DB=liftaidb
+    volumes:
+      - ./db:/var/lib/postgresql/data:cached
+    ports:
+      - '6432:5432'
+  device:
+    build: .
+    volumes:
+      - .:/code:cached
+    depends_on:
+      - db
+    environment:
+      - TRAVIS_BUILD_DIR=/code

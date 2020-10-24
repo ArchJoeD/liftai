@@ -1,0 +1,200 @@
+Modifications to Raspberry Pi 3 B
+
+
+########  How to create a GM SD card  ########
+
+1) Download the latest Raspbian Lite version (around 2GB).
+2) Format a 32GB SD card: Delete any partitions that exist on it and create one FAT partition that uses the whole disk.
+3) On a Linux machine, use the dd command with default options to copy the Raspbian image to the SD card.
+4) Remove the SD card and re-insert it to mount the file system
+5) Copy the id_rsa and id_ed25519.pub keys that we store in a secret underground bunker into /home/pi on the SD card.
+6) Copy the file misc_scripts/initial_setup.sh from the python-development git repository into /home/pi on the SD card
+7) Unmount the boot and rootfs partitions of the SD card and then move it to the Raspberry Pi board.
+8) Insert the SD card into a Raspberry Pi board.
+9) Insert a keyboard into a USB slot on the Raspberry Pi.
+10) Attach an HDMI monitor into the HDMI connector on the Raspberry Pi (monitor needs to be on before booting).
+11) Attach an ethernet cable from the Raspberry Pi to an ethernet router connected to the internet.
+12) Boot the Raspberry Pi.  (It will probably do disk checking, thinking it might be corrupted because
+    you added some files earlier when it wasn't looking.  It may also resize the disk to add a boot partition.)
+13) Log into the Raspberry Pi using the username "pi" and password "raspberry".
+14) Change password on pi account using the passwd command, then follow the instructions to change the password
+    from raspberry to uC4exX99
+15) Change the /etc/hostname from "raspberrypi" to "1" (and make sure there's a Django device in place for device ID "1"
+16) ADVANCED: If you're creating the gold master SD card from a branch of python-development, modify initial_setup.sh
+    to "cd /home/pi/python-development" and "git checkout <branchname>" then "cd /home/pi" right after the git clone
+17) Power off the board using the command "sudo shutdown now"
+18) Remove the SD card, and make multiple copies of the SD card with a revision number and
+    the name "OS+".  Also make a microSD copy for the next step.  The "OS+" SD card is a good starting point for
+    building a new minor release (same OS, but updated LiftAI software).
+19) Take a microSD copy of the OS+ SD card and insert it into any Raspberry Pi board WITH an ethernet connection.
+20) Run the initial_setup.sh script ./initial_setup.sh
+    This can take something like 20 minutes.
+21) Check that ZeroTier got installed by running "sudo systemctl status zerotier-one.service".  If this causes an
+    error, then you need to pull out the ZeroTier installation part of the script and run it again.
+    It often fails because no valid OpenPGP data was found on their site.
+22) Go into the directory /home/pi/python-development/mfg and run this command:
+    ./mfg_setup.sh hologram
+    This sets the device up to work with the hologram SIM card and Huawei MS2372 modem.
+23) Copy the correct hardware configuration, hwconfig.json into /etc/liftai
+    I think we need to make sure root owns these /etc/liftai files and they have 0x644 permissions.
+    This needs to specify the hardware being manufactured and using the GM image, special chips, audio filters, etc.
+    DO NOT REBOOT THE DEVICE AFTER THIS POINT! (due to an app set up in /etc/runonce.d)
+24) Verify that /etc/runonce.d/ contains both the hostname_setup.sh script.
+25) Go into the /home/pi/python-development/mfg directory and run this command:
+    sudo ./remove_all_data.sh
+    This will print out some frightening warnings and ask you to type "yes".  Type "yes" and hit ENTER.
+26) Execute a "sudo shutdown now" command fairly quickly and after the system is off.
+27) Remove the SD card and make multiple copies of it with a revision number and the name "GM".
+28) Insert a copy of the GM card into the hardware that will be manufactured (no need to test on older HW).  Power it
+    on and make sure the routine_test.sh passes.  The main LED should be green.
+29) Power off the device and wait 10 minutes for all the LEDs to go off.  If they don't go off after say 12 minutes,
+    then something is wrong with the GPIO input.
+30) Plug the device back in and verify it ends up with the green LED on.
+31) Allow the device to run overnight as a test of the GM image (don't need to do this on every device, just when
+    validating the GM SD card image).
+
+
+######### Additional Details Below ##########
+
+The stuff below is in the two scripts: initial_setup.sh and deploy_clean_raspbian.sh
+
+This is needed to get the pipe symbol.
+sudo nano /etc/default/keyboard
+then replace "gb" with "us"
+
+### Create .ssh directory
+mkdir .ssh
+chmod 700 .ssh
+
+### Copy public SSH key to Raspberry Pi
+Copy the public SSH key into ~/.ssh/authorized_keys
+chmod 644 ~/.ssh/*.pub
+
+### Enable SSH on root
+sudo nano /etc/ssh/sshd_config
+# Then add or uncomment line:    PermitRootLogin yes
+# Then add or uncomment line:    PasswordAuthentication no
+# Then restart the SSH service
+sudo service sshd restart
+# Enable the service on boot
+sudo systemctl enable ssh
+
+### Copy the common id_rsa and id_rsa.pub files into /home/pi/.ssh and change mode to 600
+# This is probably bad practice to re-use the same rsa key for all Raspberry Pi devices!
+# We need another solution that doesn't require putting hundreds or thousands of keys into Github.
+
+### Install git
+sudo apt-get update
+sudo apt-get -y install git
+
+### Clone the repository from Github
+git clone git@github.com:LiftAI/python-development.git  # This repository name will change
+
+
+### Run LiftAI installation
+# You may need to change the network id in the ./zerotier_install.sh file to whatever is being used in zerotier.
+set working directory to /home/pi/python-development and execute ./deploy_clean_raspian.sh
+
+
+### Getting cellular modem working
+# install ppp and usb-modeswitch
+sudo apt-get install ppp
+# Do lsusb to see if modem is detected and USB is opering in the correct mode
+lsusb   # If you see "Modem/Networkcard" in the response, it's good.  Otherwise, lots of steps involved.
+# Install ppp scripts
+wget https://github.com/twilio/wireless-ppp-scripts/archive/master.zip
+unzip master.zip
+cd wireless-ppp-scripts
+# Edit the chatscripts/twilio file to use the correct APN.  With Telit, it's "a105.2way.net" but this could change, check the portal.
+sudo cp chatscripts/twilio /etc/chatscripts
+sudo cp peers/twilio /etc/ppp/peers
+sudo ifconfig wlan0 down
+sudo pon twilio   # You may need to edit the peers script since a comment got wrapped, shows up as a Huawei command.
+# Connect on boot
+sudo nano /etc/rc.local  #  add this to the bottom of rc.local:   pon twilio
+
+
+### GPIO python stuff  (Not needed unless we add some GPIO functionality later)
+sudo pip3 install RPi.GPIO
+
+### MPU-6050 accelerometer
+sudo nano /etc/modules
+# Add    i2c-bcm2708
+# Add    i2c-dev
+
+# Make sure /etc/modprobe.d/raspi-blacklist.conf doesn't have blacklists for what we need
+#  Comment out blacklist spi-bcm2708
+#  Comment out blacklist i2c_bcm2708
+
+# Edit  /boot/config.txt and add the text to the bottom:
+#    dtparam=i2c1=on
+#    dtparam=i2c_arm=on
+
+#  Reboot the Raspberry Pi after all this.
+
+sudo apt-get install i2c-tools
+sudo i2cdetect -y 1
+# This should output a 2-D style ASCII display with a number filled in at location 68 with 68
+# and a 60 filled in at location 60.
+# Note that you need to use a pullup or pulldown resistor on pin ADO to select 69 vs 68
+# on the accelerometer.
+
+
+### MPL3115A2 altimeter stuff  
+sudo su -
+echo -n 1 > /sys/module/i2c_bcm2708/parameters/combined
+exit
+
+wwan: 00:1e:10:1f:00:00
+
+
+### Tests for measuring latency on the Pi system
+sudo apt-get install rt-tests
+
+### Running latency test 
+sudo cyclictest --smp -p98 -m  # priority 98, memory locked
+
+### Installing stress test
+sudo apt-get install stress
+
+### How to mount USB flash drive
+sudo mkdir /media/usb
+sudo mount /dev/sda1 /media/usb
+
+### How to unmount USB flash drive
+sudo umount /media/usb
+
+
+########  Hardware Modificiations  ########
+
+MPL3115A2 Altimeter
+MPU6050 Accelerometer
+Huawei MS2131i-8 HSPA+ USB Stick (cellphone)
+
+For debugging, don't use the cellphone but just connect ethernet from the Raspberry Pi to a router.
+
+For both the altimeter and accelerometer, we connect the following pins to the Raspberry Pi header:
+VCC to 3.3V power (NOT 5V power)
+GND to GND
+SDA to SDA
+SCL to SCL
+
+### Raspberry Pi Header
+VCC = Pin 1
+GND = Pin 6
+SDA = Pin 3
+SCL = Pin 5
+
+### MPL3115A2 Altimeter
+VCC = Pin 1
+GND = Pin 2
+SDA = Pin 7
+SCL = Pin 6
+
+### MPU6050 Accelerometer
+VCC = Pin 1
+GND = Pin 2
+SDA = Pin 4
+SCL = Pin 3
+
+

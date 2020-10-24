@@ -1,0 +1,12 @@
+[Unit]
+Description=Service to create periodic reports
+After=pgbouncer.service
+
+[Service]
+Type=simple
+ExecStart=/home/pi/.virtualenvs/liftai_reportgenerator/bin/python -O /home/pi/.virtualenvs/liftai_reportgenerator/bin/reportgenerator
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

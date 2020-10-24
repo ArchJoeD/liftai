@@ -1,0 +1,43 @@
+Instructions are based on the article:
+https://iamkelv.in/blog/2017/06/zerotier.html
+
+Create a ZeroTier network (should be done once):
+
+1. Register your account at https://my.zerotier.com/
+2. Create your network at https://my.zerotier.com/network. Click “Create”
+3. Click on your newly created network entry and follow these steps:
+    3.1 Change the name to something less random
+    3.2 Under IPv4 Auto-Assign, check Auto-Assign from Range and click on an IP range which you know will
+    not conflict with the private IP ranges of any networks you use your devices on
+    (ZeroTier will automatically assign your devices an IP from this range)
+    3.3 Under Access Control, ensure Certificate (Private Network) is checked
+    3.4 Take note of the Network ID
+4. Modify "zerotier_install.sh" file in a git repo and set correct NETWORK_ID variable
+
+
+Configure raspberry pi
+
+1. Run the ./zerotier_install.sh from the
+2. Run the sudo zerotier-cli status
+3. Copy the client id (e.g. a5d986c6b)
+
+
+Enable new client on the zerotier web page:
+
+1. Authenticate your device by going to https://my.zerotier.com/network/[Network ID]
+(the configuration page we used in the previous section),
+scrolling down to Membersand checking the Auth checkbox
+2. Optionally, assign your Pi a nicer IP address (such as one ending in .1)
+by going to the Managed IPs column, entering an IP address within the IP range you chose in the previous section,
+then pressing the plus icon to save your changes (you can also delete the old one by pressing the bin icon)
+3. Take a note of an IP address of your raspberry pi
+
+
+Configure your client (linux, mac, windows):
+
+1. Download and install a zerotier client for your platform https://www.zerotier.com/download.shtml
+2. Join to the network with the same Network ID as you set for raspberry pi
+3. Enable new client on the https://my.zerotier.com/network/[Network ID]
+4. ping your raspberry pi device via an IP from the https://my.zerotier.com/network/[Network ID]
+
+

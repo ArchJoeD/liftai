@@ -1,0 +1,12 @@
+[Unit]
+Description=Service to detect stoppages on low use elevators
+After=pgbouncer.service
+
+[Service]
+Type=simple
+ExecStart=/home/pi/.virtualenvs/liftai_lowusestoppage/bin/python -O /home/pi/.virtualenvs/liftai_lowusestoppage/bin/lowusestoppage
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

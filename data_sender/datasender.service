@@ -1,0 +1,12 @@
+[Unit]
+Description=Service to send data to the Cloud API
+After=pgbouncer.service
+
+[Service]
+Type=simple
+ExecStart=/home/pi/.virtualenvs/liftai_datasender/bin/python -O /home/pi/.virtualenvs/liftai_datasender/bin/datasender
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

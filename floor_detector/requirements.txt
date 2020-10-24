@@ -1,0 +1,4 @@
+psycopg2==2.8.4
+SQLAlchemy==1.3.10
+python-dateutil
+freezegun==0.3.15

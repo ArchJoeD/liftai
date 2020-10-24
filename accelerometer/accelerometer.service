@@ -1,0 +1,12 @@
+[Unit]
+Description=Service to gather accelerometer data
+After=timeupdater.service pgbouncer.service
+
+[Service]
+Type=simple
+ExecStart=/home/pi/.virtualenvs/liftai_accelerometer/bin/python -O /home/pi/.virtualenvs/liftai_accelerometer/bin/accelerometer
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

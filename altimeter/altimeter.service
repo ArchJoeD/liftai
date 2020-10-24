@@ -1,0 +1,12 @@
+[Unit]
+Description=Service to gather altimeter data
+After=timeupdater.service pgbouncer.service
+
+[Service]
+Type=simple
+ExecStart=/home/pi/.virtualenvs/liftai_altimeter/bin/python -O /home/pi/.virtualenvs/liftai_altimeter/bin/altimeter
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

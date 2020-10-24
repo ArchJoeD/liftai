@@ -1,0 +1,12 @@
+[Unit]
+Description=Device problem detector
+After=pgbouncer.service
+
+[Service]
+Type=simple
+ExecStart=/home/pi/.virtualenvs/liftai_elisha/bin/python -O /home/pi/.virtualenvs/liftai_elisha/bin/elisha
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,38 @@
+language: python
+python:
+    - "3.5"
+services:
+    - postgresql
+addons:
+    postgresql: "10"
+install:
+    - sudo apt update -y
+    - sudo apt install -y jq libpq-dev postgresql-client postgresql-client-common libatlas-base-dev libsndfile-dev python-dev python-pip python3-dev python3-pip portaudio19-dev libffi-dev
+    - pip3 install ./utilities
+    - pip3 install ./notifications
+    - pip3 install ./accelerometer
+    - pip3 install ./altimeter
+    - pip3 install ./anomaly_detector
+    - pip3 install ./audio_recorder
+    - pip3 install ./bank_stoppage
+    - pip3 install ./data_sender
+    - pip3 install ./elevation
+    - pip3 install ./elisha
+    - pip3 install ./escalator_stoppage
+    - pip3 install ./floor_detector
+    - pip3 install ./gpio
+    - pip3 install ./low_use_stoppage
+    - pip3 install ./ping_cloud
+    - pip3 install ./report_generator
+    - pip3 install ./roawatch
+    - pip3 install ./standalone_stoppage
+    - pip3 install ./trips
+    - pip3 install ./vibration
+
+before_script:
+    - psql -U postgres -c 'CREATE USER usr WITH PASSWORD '"'"'pass'"'"';'
+    - psql -U postgres -c 'CREATE DATABASE liftaidb;'
+    - psql -U postgres -c 'GRANT ALL PRIVILEGES ON DATABASE liftaidb TO usr;'
+    - psql -U postgres -d liftaidb -a -f $TRAVIS_BUILD_DIR/global_install.sql
+script:
+    - LIFTAI_DB_HOST=127.0.0.1:5432 python3 $TRAVIS_BUILD_DIR/test.py -v

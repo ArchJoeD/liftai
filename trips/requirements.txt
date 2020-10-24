@@ -1,0 +1,4 @@
+SQLAlchemy==1.3.10
+psycopg2==2.8.4
+liftai-notifications
+scipy==1.3.1
